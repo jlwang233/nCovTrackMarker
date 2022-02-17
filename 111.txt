@@ -1,0 +1,75 @@
+
+YANG PAN  14:34 
+cust dimnsn  cmr_rgn_code 来源于SHAR2.CNTRY_INDUS_RGN_LNK (手工维护的)   join条件 是sods1.customer.cntry_code + crpr2.v_cust_cvrage_isu. IBM_WWIDE_ISU_CODE
+select isi.IBM_WWIDE_ISU_CODE,isi.INDUS_SCTR_CODE,CAST(COALESCE(h.CRM_RGN_CODE, '') AS VARCHAR(6)) AS CRM_RGN_CODE,
+ CAST(COALESCE(h.CNTRY_CODE,'')  AS CHAR(3)) as CNTRY_CODE, CAST(COALESCE(UTOL.F_CODE_DSCR('crm_rgn_code', h.CRM_RGN_CODE),'')  AS VARCHAR(40)) as CRM_RGN_DSCR
+from SHAR1.INDUS_SCTR_IBM_WWIDE_ISU_LNK isi 
+Left Join SHAR2.CNTRY_INDUS_RGN_LNK h
+on isi.indus_sctr_code = h.indus_sctr_code  and h.INACT_FLAG = 0
+with ur; 
+LIN XIE  14:36
+应该还有几个条件
+14:36
+4X的判断
+YANG PAN  14:39
+4x  你是指crm_rgn_code  不？
+LIN XIE  14:41
+嗯，我记得先看看authrtn group，判断4X，然后还有一段是看ibm isu code
+YANG PAN  14:43
+If tran.CNTRY_CODE = 'USA' and tran.AUTHRZTN_GRP = 'ZFED' then '4X' Else If tran.CNTRY_CODE = 'USA'  and  tran.IBM_SND_RGN_CODE <> '' and (tran.IBM_WWIDE_ISU_CODE = '32' or tran.IBM_WWIDE_ISU_CODE = '34')  then tran.IBM_SND_RGN_CODE else tran.CRM_RGN_CODE 
+YANG PAN  14:44
+这是后加的吧
+14:44
+这是后面的逻辑了
+LIN XIE  14:45
+image.png 
+14:45
+这是RDc给过来的rgn
+YANG PAN  14:45
+前面通用的就是来自于SHAR2.CNTRY_INDUS_RGN_LNK
+LIN XIE  14:45
+嗯，如果是这些条件，取的是Abe他们那个view的IBM_SND_RGN_CODE
+14:45
+如果不是，则是你的那段
+14:46
+那段的映射可能需要改
+YANG PAN  14:46
+嗯 对
+14:46
+除了cntry code 其余字段都是cvrage 那个view 的
+14:46
+上面说的表的join 关系 也主要是那个view
+14:46
+isu 相关的
+LIN XIE  14:46
+这是CD表
+image.png 
+YANG PAN  14:47
+所以如果isu 的变化如果体现不出来 我们这边估计也体现不出来吧
+LIN XIE  14:47
+所以对US来说，依赖于RDc数据
+14:47
+但是我们这个映射表得看看
+YANG PAN  14:47
+哪个映射表 SHAR2.CNTRY_INDUS_RGN_LNK？
+LIN XIE  14:48
+对
+YANG PAN  14:48
+这个是manual 维护的
+LIN XIE  14:48
+SHAR1.INDUS_SCTR_IBM_WWIDE_ISU_LNK isi 
+Left Join SHAR2.CNTRY_INDUS_RGN_LNK h
+14:48
+这两张
+14:48
+对啊，手工维护，我们得看看数据要不要更新
+14:48
+这个不是通过OCE管理的么
+YANG PAN  14:49
+第一个表是oce
+14:50
+第二个不是
+LIN XIE  14:50
+ok
+14:50
+如果，如果可以，看看能否改逻辑全从ISU的view拿
